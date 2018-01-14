@@ -1,0 +1,544 @@
+Voici la liste des appels https pour le module ozw672
+
+=== Get version
+https://192.168.1.42/api/version.json
+[source,]
+----
+{	
+	"Version": "1.3.0",
+	
+	"Result": {
+		"Success": "true"
+	}
+}
+----
+
+=== Authentification
+https://192.168.1.42/api/auth/login.json?user=<username>&pwd=<passwd>
+[source,]
+----
+{
+	
+	"SessionId": "<sessionid>",
+	
+    "Result": {
+		"Success": "true"
+    }
+}
+----
+
+=== Récupère les informations de la carte
+https://192.168.1.42/api/device/info.json?SessionId=<sessionid>
+[source,]
+----
+{
+	"Device": {
+		"Name": "OZW672.01",
+		"Addr": "50",
+		"Type": "OZW672.01",
+		"FabNr": "008194",
+		"SerialNr": "00FD00FF653A",
+		"FwVersion": "00.06.00",
+		"SysDefVersion": "02.14.01"
+	},
+    "Result": {
+		"Success": "true"
+	}
+}
+----
+
+=== Récupère les informations des équipements
+https://192.168.1.42/api/devicelist/list.json?SessionId=<sessionid>
+[source,]
+----
+{
+	"Devices":
+		[
+	
+		{
+			"Name": "OZW672.01",
+			"Addr": "50",
+			"Type": "OZW672.01",
+			"SerialNr": "00FD00FF653A",
+			"TreeDate": "03.01.2018",
+			"TreeTime": "16:29",
+			"TreeGenerated": "true"
+		},
+	
+	
+		{
+			"Name": "Chaudière",
+			"Addr": "1",
+			"Type": "RVS13.143\/227",
+			"SerialNr": "00500001D02A",
+			"TreeDate": "03.01.2018",
+			"TreeTime": "16:32",
+			"TreeGenerated": "true"
+		}
+	
+		],
+    	"Result": {
+		"Success": "true"
+	}
+}
+----
+
+=== Donne l'ID pour trouver les métriques intéressantes :
+https://192.168.1.42/api/menutree/device_root.json?SessionId=<sessionid>&SerialNumber=00FD00FF653A&TreeName=Mobile
+https://192.168.1.42/api/menutree/device_root.json?SessionId=<sessionid>&SerialNumber=00500001D02A&TreeName=Mobile
+[source,]
+----
+{
+	"TreeItem": {
+		"Id": "639"
+	},
+	"Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Donne les métriques intéressantes :
+https://192.168.1.42/api/menutree/list.json?SessionId=<sessionid>&Id=639
+[source,]
+----
+{
+	"MenuItems": 
+		[
+		],
+	"DatapointItems":
+		[
+		],
+	"WidgetItems": 
+		[
+		{
+			"Id": "640",
+			"Area": "0",
+			"Type": "4",
+			"WidgetId": "327785",
+			"Priority": "1",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "641",
+				"GroupTxtId": "553"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "0",
+				"Long": "",
+				"Short": ""
+			}	
+	},
+		{
+			"Id": "642",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "2950430",
+			"Priority": "1",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "643"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "2135",
+				"Long": "Température ambiante réelle CC1",
+				"Short": "TAmbAct CC1"
+			}	
+	},
+		{
+			"Id": "644",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "328993",
+			"Priority": "4",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "645"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "39",
+				"Long": "Température extérieure",
+				"Short": "Temp ext."
+			}	
+	},
+		{
+			"Id": "646",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "2163992",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "647"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "459",
+				"Long": "Température de départ circuit de chauffe 1",
+				"Short": "ValRéelleTempDép CC1"
+			}	
+	},
+		{
+			"Id": "648",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "853273",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "649"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "54",
+				"Long": "Température de chaudière",
+				"Short": "Temp.réelle chaudière"
+			}	
+	},
+		{
+			"Id": "650",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "1115418",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "651"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "492",
+				"Long": "Température de retour",
+				"Short": "ValRéelTRetour"
+			}	
+	},
+		{
+			"Id": "652",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "328991",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "653"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "2753",
+				"Long": "Température de départ réelle bus",
+				"Short": "TDép Réelle Bus"
+			}	
+	},
+		{
+			"Id": "654",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "329071",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "655"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "3731",
+				"Long": "Température extérieure minimum",
+				"Short": "TExtMin"
+			}	
+	},
+		{
+			"Id": "656",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "329070",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "657"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "3732",
+				"Long": "Température extérieure maximum",
+				"Short": "TExtMax"
+			}	
+	},
+		{
+			"Id": "658",
+			"Area": "1",
+			"Type": "3",
+			"WidgetId": "854331",
+			"Priority": "0",
+			"IconNr": "-1",
+			"Datapoint": {
+				"Id": "659"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "231",
+				"Long": "Temps de fonctionnement brûleur étage 1",
+				"Short": "HFonctEt1 Brûleur"
+			}	
+	},
+		{
+			"Id": "660",
+			"Area": "2",
+			"Type": "1",
+			"WidgetId": "2426227",
+			"Priority": "0",
+			"IconNr": "1",
+			"PressedValue": "1",
+			"Datapoint": {
+				"Id": "661"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "4463",
+				"Long": "Charge forcée ECS",
+				"Short": "ChargeForcée ECS"
+			}	
+	},
+		{
+			"Id": "662",
+			"Area": "2",
+			"Type": "3",
+			"WidgetId": "2950542",
+			"Priority": "1",
+			"IconNr": "4",
+			"Datapoint": {
+				"Id": "663"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "3428",
+				"Long": "Consigne confort temp.ambiante CC1",
+				"Short": "ConsConfort TA CC1"
+			}	
+	},
+		{
+			"Id": "664",
+			"Area": "2",
+			"Type": "3",
+			"WidgetId": "2950544",
+			"Priority": "0",
+			"IconNr": "4",
+			"Datapoint": {
+				"Id": "665"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "465",
+				"Long": "Valeur de consigne réduite temp. ambiante CC1",
+				"Short": "ConsRédTempAmb CC1"
+			}	
+	},
+		{
+			"Id": "666",
+			"Area": "2",
+			"Type": "3",
+			"WidgetId": "2950546",
+			"Priority": "0",
+			"IconNr": "4",
+			"Datapoint": {
+				"Id": "667"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "463",
+				"Long": "Consigne horsgel température ambiante CC1",
+				"Short": "ConsHorsGelTAmb CC1"
+			}	
+	},
+		{
+			"Id": "668",
+			"Area": "2",
+			"Type": "4",
+			"WidgetId": "16844148",
+			"Priority": "2",
+			"IconNr": "5",
+			"Datapoint": {
+				"Id": "669",
+				"GroupTxtId": "497"
+			},
+			"DatapointFeedback": {
+				"Id": "670",
+				"GroupTxtId": "132"
+			},
+			"Text": {
+				"CatId": "2",
+				"GroupId": "2",
+				"Id": "2289",
+				"Long": "Régime Circuit de chauffe  1",
+				"Short": "Régime CC1"
+			}	
+	}	
+		],
+	"Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Récupère la description de l'indicateur (ça doit dépendre du type d'indicateur)
+https://192.168.1.42/api/menutree/datapoint_desc.json?SessionId=<sessionid>&Id=647
+[source,]
+----
+{	
+	"Description": 
+		{
+			"Type": "Numeric",
+			"Value": "44.890625",
+			"Unit": "°C",
+			"Name": "Température de départ circuit de chauffe 1",
+			"Min": "0.000000",
+			"Max": "140.000000",
+			"Resolution": "0.100000",
+			"FieldWitdh": "11",
+			"DecimalDigits": "1",
+			"HasValid": "false",
+		},
+		"Result": {
+			"Success": "true"
+		}
+}
+----
+
+ou 
+[source,]
+----
+{	
+	"Description": 
+		{
+			"Type": "Enumeration",
+			"Name": "Régime Circuit de chauffe  1",
+			"Enums":
+			[
+				{
+					"Text": "Mode protection",
+					"Value": "0",
+					"IsCurrentValue": "false"
+				},
+				{
+					"Text": "Automatique",
+					"Value": "1",
+					"IsCurrentValue": "true"
+				},
+				{
+					"Text": "Réduit",
+					"Value": "2",
+					"IsCurrentValue": "false"
+				},
+				{
+					"Text": "Confort",
+					"Value": "3",
+					"IsCurrentValue": "false"
+				}
+			]
+		},
+		"Result": {
+			"Success": "true"
+		}
+}
+----
+
+
+=== Controle l'état de défaut de la chaudière
+https://192.168.1.42/api/fault/status.json?SessionId=<sessionid>
+[source,]
+----
+{
+	"HasFault": "false",
+    "Result": {
+		"Success": "true"
+    }
+}
+----
+
+=== Controle l'état de consomation de la chaudière
+https://192.168.1.42/api/energyindicator/status.json?SessionId=<sessionid>
+[source,]
+----
+{
+	"IsIndicationActive": "true",
+	"HasIndication": "false",
+    "Result": {
+		"Success": "true"
+    }
+}
+----
+
+=== Change le mode
+https://192.168.1.42/api/menutree/write_datapoint.json?SessionId=<sessionid>&Id=669&Type=Enumeration&Value=3
+[source,]
+----
+{
+    "Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Change un indicateur numeric
+https://192.168.1.42/api/menutree/write_datapoint.json?SessionId=<sessionid>&Id=663&Type=Numeric&Value=18.5
+[source,]
+----
+{
+    "Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Lire la valeur d'un indicateur
+https://192.168.1.42/api/menutree/read_datapoint.json?SessionId=<sessionid>&Id=663
+[source,]
+----
+{
+	"Data": 
+		{
+			"Type": "Numeric",
+			"Value": "       18.5",
+			"Unit": "°C"
+		},
+    	"Result": 
+		{
+		"Success": "true"
+    		}
+}
+----
+
+ou
+[source,]
+----
+{
+	"Data": 
+		{
+			"Type": "Enumeration",
+			"Value": "Confort",
+			"Unit": "",
+			"EnumValue": "3"
+		},
+    	"Result": 
+		{
+		"Success": "true"
+    		}
+}
+----
+
+
