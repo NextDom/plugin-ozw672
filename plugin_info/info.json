@@ -1,8 +1,11 @@
 {
 	"id" : "ozw672",
-	"name" : "ozw672",
+	"name" : "Ozw672",
+	"description" : "Plugin permettant de gérer les cartes ozw672.",
 	"licence" : "AGPL",
 	"author" : "Thomas Guenneguez",
-	"require" : "1.124.0",
-	"category" : "communication"
+	"require" : "3.0",
+	"category" : "devicecommunication",
+	"changelog" : "https://jeedom.github.io/documentation/third_plugin/ozw672/#language#/index.html#_changelog",
+	"documentation" : "https://jeedom.github.io/documentation/third_plugin/ozw672/#language#/index.html"
 }

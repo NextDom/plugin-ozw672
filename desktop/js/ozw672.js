@@ -25,9 +25,8 @@ function addCmdToTable(_cmd) {
 		tr += '<input type=hidden class="cmdAttr form-control input-sm" data-l1key="unite" value="">';
         tr += '</td>';
         tr += '<td>';
-		if (_cmd.logicalId == 'state' || _cmd.logicalId == 'tvstatus' || _cmd.logicalId == 'voipstatusH323' || _cmd.logicalId == 'voipstatusSIP' || _cmd.logicalId == 'connectionstate' || _cmd.logicalId == 'wifistatus' || _cmd.logicalId == 'wifi2.4status' || _cmd.logicalId == 'wifi5status' || _cmd.logicalId == 'linkstate' || _cmd.logicalId == 'debitmontant' || _cmd.logicalId == 'debitdescendant' || _cmd.logicalId == 'margebruitmontant' || _cmd.logicalId == 'margebruitdescendant') {
-			tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isHistorized"/> {{Historiser}}<br/></span>';
-		}
+		tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="configuration" data-l2key="isCollected" value="1"/> {{Collecter}}<br/></span>';
+		tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isHistorized"/> {{Historiser}}<br/></span>';
         tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/> {{Afficher}}<br/></span>';
         tr += '</td>';
 //		tr += '<td><i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i></td>';		
@@ -139,6 +138,28 @@ $('#bt_ScanCarteCommande').on('click', function() {
         url: "plugins/ozw672/core/ajax/ozw672.ajax.php", // url du fichier php
         data: {
             action: "force_detect_commande_carte",
+			id: $(".li_eqLogic.active").attr('data-eqLogic_id'),
+        },
+        dataType: 'json',
+        error: function(request, status, error) {
+            handleAjaxError(request, status, $('#div_DetectBin'));
+        },
+        success: function(data) { // si l'appel a bien fonctionné
+			if (data.state != 'ok') {
+				$('#div_alert').showAlert({message: data.result, level: 'danger'});
+                return;
+			}
+			window.location.reload();
+		}
+    });
+});
+
+$('#bt_ScanCarteAllCommande').on('click', function() {
+    $.ajax({// fonction permettant de faire de l'ajax
+        type: "POST", // methode de transmission des données au fichier php
+        url: "plugins/ozw672/core/ajax/ozw672.ajax.php", // url du fichier php
+        data: {
+            action: "force_detect_all_commande_carte",
 			id: $(".li_eqLogic.active").attr('data-eqLogic_id'),
         },
         dataType: 'json',

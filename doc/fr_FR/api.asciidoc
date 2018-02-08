@@ -54,7 +54,6 @@ https://192.168.1.42/api/devicelist/list.json?SessionId=<sessionid>
 {
 	"Devices":
 		[
-	
 		{
 			"Name": "OZW672.01",
 			"Addr": "50",
@@ -64,8 +63,6 @@ https://192.168.1.42/api/devicelist/list.json?SessionId=<sessionid>
 			"TreeTime": "16:29",
 			"TreeGenerated": "true"
 		},
-	
-	
 		{
 			"Name": "Chaudière",
 			"Addr": "1",
@@ -75,7 +72,6 @@ https://192.168.1.42/api/devicelist/list.json?SessionId=<sessionid>
 			"TreeTime": "16:32",
 			"TreeGenerated": "true"
 		}
-	
 		],
     	"Result": {
 		"Success": "true"
@@ -388,6 +384,365 @@ https://192.168.1.42/api/menutree/list.json?SessionId=<sessionid>&Id=639
 				"Short": "Régime CC1"
 			}	
 	}	
+		],
+	"Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Récupère le menu des indicateurs
+https://192.168.1.42/api/menutree/list.json?SessionId=<sessionid>&Id=6
+[source,]
+----
+{
+	"MenuItems": 
+		[
+	
+		],
+	"DatapointItems":
+		[
+	
+		{
+			"Id": "7",
+			"Address": "0x52781001",
+			"DpSubKey": "0",
+			"WriteAccess": "true",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "799",
+				"Long": "Jour\/heure",
+				"Short": "Jour et heure"
+			}	
+	}
+	
+		],
+	"WidgetItems": 
+		[
+	
+		],
+	"Result": {
+		"Success": "true"
+	}
+} 
+----
+
+=== Récupère les indicateurs d'un menu (exemple menu n°11)
+https://192.168.1.42/api/menutree/list.json?SessionId=865fd773-87ad-43c5-83aa-6adfdaa0c22c&Id=11
+[source,]
+----
+{
+	"MenuItems": 
+		[
+	
+		],
+	"DatapointItems":
+		[
+	
+		{
+			"Id": "13",
+			"Address": "0xafa1001",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3163",
+				"Long": "Fault 1",
+				"Short": "Fault 1"
+			}	
+	},
+	
+	
+		{
+			"Id": "14",
+			"Address": "0xaf71001",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "16",
+			"Address": "0xafa1002",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3164",
+				"Long": "Fault 2",
+				"Short": "Fault 2"
+			}	
+	},
+	
+	
+		{
+			"Id": "17",
+			"Address": "0xaf71002",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "19",
+			"Address": "0xafa1003",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3165",
+				"Long": "Fault 3",
+				"Short": "Fault 3"
+			}	
+	},
+	
+	
+		{
+			"Id": "20",
+			"Address": "0xaf71003",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "22",
+			"Address": "0xafa1004",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3166",
+				"Long": "Fault 4",
+				"Short": "Fault 4"
+			}	
+	},
+	
+	
+		{
+			"Id": "23",
+			"Address": "0xaf71004",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "25",
+			"Address": "0xafa1005",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3167",
+				"Long": "Fault 5",
+				"Short": "Fault 5"
+			}	
+	},
+	
+	
+		{
+			"Id": "26",
+			"Address": "0xaf71005",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "28",
+			"Address": "0xafa1006",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3168",
+				"Long": "Fault 6",
+				"Short": "Fault 6"
+			}	
+	},
+	
+	
+		{
+			"Id": "29",
+			"Address": "0xaf71006",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "31",
+			"Address": "0xafa1007",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3169",
+				"Long": "Fault 7",
+				"Short": "Fault 7"
+			}	
+	},
+	
+	
+		{
+			"Id": "32",
+			"Address": "0xaf71007",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "34",
+			"Address": "0xafa1008",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3170",
+				"Long": "Fault 8",
+				"Short": "Fault 8"
+			}	
+	},
+	
+	
+		{
+			"Id": "35",
+			"Address": "0xaf71008",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "37",
+			"Address": "0xafa1009",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3171",
+				"Long": "Fault 9",
+				"Short": "Fault 9"
+			}	
+	},
+	
+	
+		{
+			"Id": "38",
+			"Address": "0xaf71009",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	},
+	
+	
+		{
+			"Id": "40",
+			"Address": "0xafa100a",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "3172",
+				"Long": "Fault 10",
+				"Short": "Fault 10"
+			}	
+	},
+	
+	
+		{
+			"Id": "41",
+			"Address": "0xaf7100a",
+			"DpSubKey": "0",
+			"WriteAccess": "false",
+			"Text": {
+				"CatId": "1",
+				"GroupId": "2",
+				"Id": "542",
+				"Long": "Texte de défaut",
+				"Short": "Texte de défaut"
+			}	
+	}
+	
+		],
+	"WidgetItems": 
+		[
+	
 		],
 	"Result": {
 		"Success": "true"

@@ -44,6 +44,15 @@ try {
 		ajax::success($ozw672);
     }
 
+    if (init('action') == 'force_detect_all_commande_carte') {
+        $eqLogic = ozw672::byId(init('id'));
+        if (!is_object($eqLogic)) {
+            throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
+        }
+		$ozw672 = $eqLogic->scan_all_commande();
+		ajax::success($ozw672);
+    }
+
     throw new Exception(__('Aucune methode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {

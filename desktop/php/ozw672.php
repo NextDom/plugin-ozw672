@@ -107,9 +107,10 @@ $eqLogics = eqLogic::byType('ozw672');
 					<div class="col-sm-10">
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Activer}}" data-l1key="isEnable" checked/>Activer</label>
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>Visible</label>
-					<a class="btn btn-default" id="bt_goCarte" title='{{Accéder à la carte}}'><i class="fa fa-cogs"></i></a>
-					<a class="btn btn-default carte_only" id="bt_ScanCarte" title='{{Detecter appareil}}'><i class="fa fa-refresh"></i></a>
-					<a class="btn btn-default nocarte_only" id="bt_ScanCarteCommande" title='{{Detecter commandes}}'><i class="fa fa-refresh"></i></a>
+					<a class="btn btn-default" id="bt_goCarte" title='{{Accéder à la carte}}'><i class="fa fa-cogs"> {{Accéder à la carte}}</i></a>
+					<a class="btn btn-default carte_only" id="bt_ScanCarte" title='{{Detecter appareil}}'><i class="fa fa-refresh"> {{Détecter les sous-cartes}}</i></a>
+					<a class="btn btn-default nocarte_only" id="bt_ScanCarteCommande" title='{{Detecter les commandes principales}}'><i class="fa fa-refresh"> {{Detecter les commandes principales}}</i></a>
+					<a class="btn btn-default nocarte_only" id="bt_ScanCarteAllCommande" title='{{Detecter toutes les commandes}}'><i class="fa fa-refresh"> {{Detecter toutes les commandes}}</i></a>
 				  </div>
                 </div>
                 <div class="form-group carte_only">

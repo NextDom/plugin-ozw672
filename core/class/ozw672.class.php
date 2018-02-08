@@ -114,6 +114,7 @@ class ozw672 extends eqLogic {
 						$eqLogic->setName($item['Text']['Long']);
 						$eqLogic->setEqType_name('ozw672');
 						$eqLogic->setConfiguration('type', 'appareil');
+						$eqLogic->setConfiguration('address', substr($item['Text']['Long'], 0, strpos($item['Text']['Long'], " ")));
 						$eqLogic->setConfiguration('parent', $this->getId());
 						$eqLogic->setIsEnable(1);
 						$eqLogic->setIsVisible(1);
@@ -134,11 +135,51 @@ class ozw672 extends eqLogic {
 				throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
 			}
 			$carte->getSessionId();
-			$this->scan_sub_commande($carte, $this->getLogicalId());
+			$url = 'https://'.$carte->getConfiguration('ip').'/api/devicelist/list.json?SessionId='. $carte->_SessionId;
+			log::add('ozw672','debug',$url);
+			$json = $this->https_file_get_contents($url);
+			if ( $json === false )
+				throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+			$obj = json_decode($json, TRUE);
+			if ( isset($obj['Devices']) )
+			{
+				foreach ($obj['Devices'] as $item )
+				{
+					if ( $item['Addr'] == $this->getConfiguration('address') )
+					{
+						$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/device_root.json?SessionId='. $carte->_SessionId.'&SerialNumber='.$item['SerialNr'].'&TreeName=Mobile';
+						log::add('ozw672','debug',$url);
+						$json = $this->https_file_get_contents($url);
+						if ( $json === false )
+							throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+						$obj = json_decode($json, TRUE);
+						if ( isset($obj['TreeItem']['Id']) )
+						{
+							log::add('ozw672','debug','Find TreeItem : '.$obj['TreeItem']['Id']);
+							$this->scan_sub_commande($carte, $obj['TreeItem']['Id'], true);
+						}
+					}
+				}
+			}
 		}
 	}
 
-	public function scan_sub_commande($carte, $id)
+	public function scan_all_commande()
+	{
+		if ( $this->getIsEnable() )
+		{
+			log::add('ozw672','debug',__('scan commande appareil ',__FILE__).$this->name);
+			$this->scan_commande();
+			$carte = ozw672::byId($this->getConfiguration('parent'));
+			if (!is_object($carte)) {
+				throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
+			}
+			$carte->getSessionId();
+			$this->scan_sub_commande($carte, $this->getLogicalId(), false);
+		}
+	}
+
+	public function scan_sub_commande($carte, $id, $principale, $lastOrder = 0)
 	{
 		$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/list.json?SessionId='. $carte->_SessionId.'&Id='.$id;
 		log::add('ozw672','debug',$url);
@@ -153,7 +194,7 @@ class ozw672 extends eqLogic {
 				log::add('ozw672','debug','Find MenuItems : '.$item['Id']);
 				if ( isset($item['Id']) )
 				{
-					$this->scan_sub_commande($carte, $item['Id']);
+					$this->scan_sub_commande($carte, $item['Id'], $principale);
 				}
 			}
 		}
@@ -161,85 +202,279 @@ class ozw672 extends eqLogic {
 		{
 			foreach ($obj['DatapointItems'] as $item )
 			{
-				log::add('ozw672','debug','Find DatapointItems : '.$item['Id']);
-				if ( isset($item['Id']) )
+				$lastOrder = $this->create_commande($carte, $item, $principale, $lastOrder);
+			}
+		}
+		if ( isset($obj['WidgetItems']) )
+		{
+			foreach ($obj['WidgetItems'] as $item )
+			{
+				$this->scan_sub_commande($carte, $item['Id'], $principale);
+			}
+		}
+	}
+
+	private function create_commande($carte, $item, $principale, $lastOrder)
+	{
+		log::add('ozw672','debug','Find DatapointItems : '.$item['Id']);
+		if ( isset($item['Id']) )
+		{
+			if ( ! is_object($this->getCmd(null, $item['Id'])) && $item['Text']['Long'] != "" )
+			{
+				log::add('ozw672','info','Detection commande : '.$item['Id'].' ('.$item['Text']['Long'].')');
+				$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/datapoint_desc.json?SessionId='. $carte->_SessionId.'&Id='.$item['Id'];
+				log::add('ozw672','debug',$url);
+				$json = $this->https_file_get_contents($url);
+				if ( $json === false )
+					throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+				$obj_detail = json_decode($json, TRUE);
+				if ( isset($obj_detail['Result']['Success']) && $obj_detail['Result']['Success'] === "false" )
 				{
-					if ( ! is_object($this->getCmd(null, $item['Id'])) )
+					log::add('ozw672','debug', "No datapoint_desc");
+					$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/read_datapoint.json?SessionId='. $carte->_SessionId.'&Id='.$item['Id'];
+					log::add('ozw672','debug',$url);
+					$json = $this->https_file_get_contents($url);
+					if ( $json === false )
+						throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+					$obj_detail = json_decode($json, TRUE);
+					log::add('ozw672','debug', print_r($obj_detail, true));
+					$type = $obj_detail['Data']['Type'];
+				}
+				else
+				{
+					log::add('ozw672','debug', print_r($obj_detail, true));
+					$type = $obj_detail['Description']['Type'];
+				}
+				if ( isset($obj_detail['Result']['Success']) && $obj_detail['Result']['Success'] !== "false" )
+				{
+					$name = str_replace(array('&', '#', ']', '[', '%', "'"), ' ', $item['Text']['Long']);
+					if ( ! $principale )
 					{
-						log::add('ozw672','info','Detection commande : '.$item['Id'].' ('.$item['Text']['Long'].' : '.$item['Id']['WriteAccess'].')');
-						$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/read_datapoint.json?SessionId='. $carte->_SessionId.'&Id='.$item['Id'];
-						log::add('ozw672','debug',$url);
-						$json = $this->https_file_get_contents($url);
-						if ( $json === false )
-							throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
-						$obj_detail = json_decode($json, TRUE);
-						if ( isset($obj_detail['Result']['Success']) && $obj_detail['Result']['Success'] !== "false" )
+						$name = $item['Id']." ".substr($name, 0, 45-strlen($item['Id']) -1);
+					}
+					log::add('ozw672','info','Creation commande : '.$item['Id'].' ('.$name.' : '.$item['WriteAccess'].')');
+					$cmd = new ozw672Cmd();
+					if ( is_object(cmd::byEqLogicIdCmdName($this->id, $name)) )
+					{
+						$count = 1;
+						while (is_object(cmd::byEqLogicIdCmdName($this->id, substr($name, 0, 40)."...".$count)))
 						{
-							log::add('ozw672','info','Creation commande : '.$item['Id'].' ('.$item['Text']['Long'].' : '.$item['Id']['WriteAccess'].')');
-							$cmd = new ozw672Cmd();
-							$cmd->setName($item['Text']['Long']);
-							$cmd->setEqLogic_id($this->getId());
-							$cmd->setLogicalId($item['Id']);
-							$cmd->setEventOnly(1);
-							$cmd->setIsVisible(0);
-							switch ($obj_detail['Data']['Type']) {
-								case "DateTime":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "Enumeration":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "Numeric":
-									$cmd->setType('info');
-									$cmd->setSubType('numeric');
-									$cmd->setUnite($obj_detail['Data']['Unit']);
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "Scheduler":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "RadioButton":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "String":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "AlarmInfo":
-									$cmd->setType('info');
-									$cmd->setSubType('string');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								case "TimeOfDay":
-									$cmd->setType('info');
-									$cmd->setSubType('binary');
-									$cmd->setDisplay('generic_type','GENERIC_INFO');
-									break;
-								default:
-									log::add('ozw672','error','Type inconnu reply : '.print_r($obj_detail, true));
-									break;
+							$count ++;
+						}
+						$cmd->setName(substr($name, 0, 40)."...".$count);
+						log::add('ozw672','info','Rename as '.substr($name, 0, 40)."...".$count);
+					}
+					else
+					{
+						$cmd->setName($name);
+					}
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId($item['Id']);
+					$cmd->setEventOnly(1);
+					if ( $principale )
+					{
+						$cmd->setIsVisible(1);
+						$cmd->setOrder($lastOrder);
+						$lastOrder++;
+					}
+					else
+					{
+						$cmd->setIsVisible(0);
+						$cmd->setOrder(99);
+					}
+					$cmd->setConfiguration('isCollected', '0');
+					$cmd->setConfiguration('internal_type', $type);
+					switch ($type) {
+						case "DateTime":
+							$cmd->setType('info');
+							$cmd->setSubType('string');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "Enumeration":
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							foreach ($obj_detail['Description']['Enums'] as $item_enum )
+							{
+								log::add('ozw672','debug', "item_enum ".print_r($item_enum, true));
+								$cmd->setConfiguration('internal_label_'.$item_enum['Value'], $item_enum['Text']);
 							}
 							$cmd->save();
-						}
-						else
+							break;
+						case "Numeric":
+						case "TimeOfDay":
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							if ( isset($obj_detail['Description']['Min']) )
+							{
+								$cmd->setConfiguration('minValue', $obj_detail['Description']['Min']);
+							}
+							if ( isset($obj_detail['Description']['Max']) )
+							{
+								$cmd->setConfiguration('maxValue', $obj_detail['Description']['Max']);
+							}
+							if ( isset($obj_detail['Description']['DecimalDigits']) )
+							{
+								$cmd->setConfiguration('historizeRound', $obj_detail['Description']['DecimalDigits']);
+							}
+							$cmd->setUnite($obj_detail['Description']['Unit']);
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "Scheduler":
+							$cmd->setType('info');
+							$cmd->setSubType('string');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "RadioButton":
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "CheckBox":
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							$item['WriteAccess'] = "false";
+							break;
+						case "String":
+							$cmd->setType('info');
+							$cmd->setSubType('string');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "AlarmInfo":
+							$cmd->setType('info');
+							$cmd->setSubType('string');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$cmd->save();
+							break;
+						case "TimeOfDay":
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setDisplay('generic_type','GENERIC_INFO');
+							$item['WriteAccess'] = "false";
+							#die;
+							#$cmd->save();
+							break;
+						case "Calendar":
+							$item['WriteAccess'] = "false";
+							break;
+						default:
+							log::add('ozw672','error','Type inconnu reply : '.print_r($obj_detail, true));
+							die;
+							break;
+					}
+					if ( $item['WriteAccess']  !== "false" )
+					{
+						if ( ! is_object($this->getCmd(null, 'A_'.$item['Id'])) )
 						{
-							log::add('ozw672','debug','Reply : '.print_r($obj_detail, true));
-							throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
-							next;
+							$name = "Action ".substr(str_replace(array('&', '#', ']', '[', '%', "'"), ' ', $item['Text']['Long']), 0, 38);
+							if ( ! $principale )
+							{
+								$name = $item['Id']." ".substr($name, 0, 45-strlen($item['Id'])-1);
+							}
+							$cmd = new ozw672Cmd();
+							if ( is_object(cmd::byEqLogicIdCmdName($this->id, $name)) )
+							{
+								$count = 1;
+								while (is_object(cmd::byEqLogicIdCmdName($this->id, substr($name, 0, 40)."...".$count)))
+								{
+									$count ++;
+								}
+								$cmd->setName(substr($name, 0, 40)."...".$count);
+								log::add('ozw672','info','Rename as '.substr($name, 0, 40)."...".$count);
+							}
+							else
+							{
+								$cmd->setName($name);
+							}
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('A_'.$item['Id']);
+							if ( $principale )
+							{
+								$cmd->setIsVisible(1);
+								$cmd->setOrder($lastOrder);
+								$lastOrder++;
+							}
+							else
+							{
+								$cmd->setIsVisible(0);
+								$cmd->setOrder(99);
+							}
+							$cmd->setConfiguration('internal_type', $type);
+							switch ($obj_detail['Description']['Type']) {
+								case "DateTime":
+								case "TimeOfDay":
+								case "Scheduler":
+									log::add('ozw672','info','No action create');
+									break;
+								case "RadioButton":
+									$cmd->setType('action');
+									$cmd->setSubType('select');
+									$list_value = array();
+									$count =0;
+									while ( isset($obj_detail['Description']['Buttons']['TextOpt'.$count]) )
+									{
+										if ( $obj_detail['Description']['Buttons']['Significance'] == $count )
+										{
+											array_push ($list_value, $count.'|'.$obj_detail['Description']['Buttons']['TextOpt'.$count]);
+											if ( $count > 3 )
+											{
+												log::add('ozw672','info','Error action RadioButton');
+												die;
+											}
+										}
+										$count ++;
+									}
+									$cmd->setConfiguration('listValue', join(";", $list_value));
+									$cmd->save();
+									break;
+								case "Enumeration":
+									$cmd->setType('action');
+									$cmd->setSubType('select');
+									$list_value = array();
+									foreach ($obj_detail['Description']['Enums'] as $item_enum )
+									{
+										array_push ($list_value, $item_enum['Value'].'|'.$item_enum['Text']);
+									}
+									$cmd->setConfiguration('listValue', join(";", $list_value));
+									$cmd->save();
+									break;
+								case "Numeric":
+									$cmd->setType('action');
+									$cmd->setSubType('slider');
+									$cmd->setConfiguration('minValue', $obj_detail['Description']['Min']);
+									$cmd->setConfiguration('maxValue', $obj_detail['Description']['Max']);
+									$cmd->save();
+									break;
+								case "String":
+									$cmd->setType('action');
+									$cmd->setSubType('message');
+									$cmd->setDisplay('title_disable', 1);
+									$cmd->save();
+									break;
+								default:
+									log::add('ozw672','info','Error creation action : '.$item['Id'].' ('.$item['Text']['Long'].' : '.$item['WriteAccess'].')');
+									die;
+									break;
+							}
 						}
 					}
 				}
+				else
+				{
+					log::add('ozw672','debug','Reply : '.print_r($obj_detail, true));
+					throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+					next;
+				}
 			}
 		}
+		return $lastOrder;
 	}
 
 	public function preInsert()
@@ -361,7 +596,7 @@ class ozw672 extends eqLogic {
 		$eqLogic_cmd->event(date("d/m/Y H:i",(time())));
 		foreach ($this->getCmd() as $cmd)
 		{
-			if ( is_numeric($cmd->getLogicalId()) )
+			if ( is_numeric($cmd->getLogicalId()) && $cmd->getConfiguration('isCollected') == 1 )
 			{
 				$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/read_datapoint.json?SessionId='. $carte->_SessionId.'&Id='.$cmd->getLogicalId();
 				log::add('ozw672','debug',$url);
