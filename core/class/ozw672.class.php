@@ -24,6 +24,21 @@ class ozw672 extends eqLogic {
 	public $_SessionId;
     /*     * ***********************Methode static*************************** */
 
+	public function getParent() {
+        if ( $this->getConfiguration('type', '') == 'ozw672' )
+		{
+            $carte = $this;
+        }
+        else
+        {
+            $carte = ozw672::byId($this->getConfiguration('parent'));
+            if ( ! is_object($carte) ) {
+                throw new Exception(__('ozw672 parent eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
+            }
+        }
+        return $carte;
+    }
+
 	public static function pull() {
 		foreach (eqLogic::byTypeAndSearhConfiguration('ozw672', '"type":"appareil"') as $eqLogic)
 		{
@@ -130,10 +145,7 @@ class ozw672 extends eqLogic {
 		if ( $this->getIsEnable() )
 		{
 			log::add('ozw672','debug',__('scan commande appareil ',__FILE__).$this->name);
-			$carte = ozw672::byId($this->getConfiguration('parent'));
-			if (!is_object($carte)) {
-				throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
-			}
+            $carte = $this->getParent();
 			$carte->getSessionId();
 			$url = 'https://'.$carte->getConfiguration('ip').'/api/devicelist/list.json?SessionId='. $carte->_SessionId;
 			log::add('ozw672','debug',$url);
@@ -156,7 +168,7 @@ class ozw672 extends eqLogic {
 						if ( isset($obj['TreeItem']['Id']) )
 						{
 							log::add('ozw672','debug','Find TreeItem : '.$obj['TreeItem']['Id']);
-							$this->scan_sub_commande($carte, $obj['TreeItem']['Id'], true);
+							$lastOrder = $this->scan_sub_commande($carte, $obj['TreeItem']['Id'], true, 2);
 						}
 					}
 				}
@@ -170,16 +182,13 @@ class ozw672 extends eqLogic {
 		{
 			log::add('ozw672','debug',__('scan commande appareil ',__FILE__).$this->name);
 			$this->scan_commande();
-			$carte = ozw672::byId($this->getConfiguration('parent'));
-			if (!is_object($carte)) {
-				throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
-			}
+            $carte = $this->getParent();
 			$carte->getSessionId();
-			$this->scan_sub_commande($carte, $this->getLogicalId(), false);
+			$lastOrder = $this->scan_sub_commande($carte, $this->getLogicalId(), false, 99);
 		}
 	}
 
-	public function scan_sub_commande($carte, $id, $principale, $lastOrder = 0)
+	public function scan_sub_commande($carte, $id, $principale, $lastOrder)
 	{
 		$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/list.json?SessionId='. $carte->_SessionId.'&Id='.$id;
 		log::add('ozw672','debug',$url);
@@ -194,7 +203,7 @@ class ozw672 extends eqLogic {
 				log::add('ozw672','debug','Find MenuItems : '.$item['Id']);
 				if ( isset($item['Id']) )
 				{
-					$this->scan_sub_commande($carte, $item['Id'], $principale);
+					$lastOrder = $this->scan_sub_commande($carte, $item['Id'], $principale, $lastOrder);
 				}
 			}
 		}
@@ -209,9 +218,10 @@ class ozw672 extends eqLogic {
 		{
 			foreach ($obj['WidgetItems'] as $item )
 			{
-				$this->scan_sub_commande($carte, $item['Id'], $principale);
+				$lastOrder = $this->scan_sub_commande($carte, $item['Id'], $principale, $lastOrder);
 			}
 		}
+		return $lastOrder;
 	}
 
 	private function create_commande($carte, $item, $principale, $lastOrder)
@@ -252,7 +262,7 @@ class ozw672 extends eqLogic {
 					{
 						$name = $item['Id']." ".substr($name, 0, 45-strlen($item['Id']) -1);
 					}
-					log::add('ozw672','info','Creation commande : '.$item['Id'].' ('.$name.' : '.$item['WriteAccess'].')');
+					log::add('ozw672','info','Creation commande : '.$item['Id'].' ('.$name.' : '.$item['WriteAccess'].'), '.$lastOrder);
 					$cmd = new ozw672Cmd();
 					if ( is_object(cmd::byEqLogicIdCmdName($this->id, $name)) )
 					{
@@ -275,14 +285,17 @@ class ozw672 extends eqLogic {
 					{
 						$cmd->setIsVisible(1);
 						$cmd->setOrder($lastOrder);
+						$cmd->setConfiguration('isPrincipale', '1');
+						$cmd->setConfiguration('isCollected', '1');
 						$lastOrder++;
 					}
 					else
 					{
 						$cmd->setIsVisible(0);
+						$cmd->setConfiguration('isPrincipale', '0');
 						$cmd->setOrder(99);
+						$cmd->setConfiguration('isCollected', '0');
 					}
-					$cmd->setConfiguration('isCollected', '0');
 					$cmd->setConfiguration('internal_type', $type);
 					switch ($type) {
 						case "DateTime":
@@ -373,7 +386,7 @@ class ozw672 extends eqLogic {
 					{
 						if ( ! is_object($this->getCmd(null, 'A_'.$item['Id'])) )
 						{
-							$name = "Action ".substr(str_replace(array('&', '#', ']', '[', '%', "'"), ' ', $item['Text']['Long']), 0, 38);
+							$name = "Action ".substr(str_replace(array('&', '#', ']', '[', '%', "'"), ' ', $item['Text']['Long']), 0, 38).' '.$lastOrder;
 							if ( ! $principale )
 							{
 								$name = $item['Id']." ".substr($name, 0, 45-strlen($item['Id'])-1);
@@ -395,6 +408,8 @@ class ozw672 extends eqLogic {
 							}
 							$cmd->setEqLogic_id($this->getId());
 							$cmd->setLogicalId('A_'.$item['Id']);
+							$cmd->setConfiguration('infoId', $item['Id']);
+
 							if ( $principale )
 							{
 								$cmd->setIsVisible(1);
@@ -501,17 +516,6 @@ class ozw672 extends eqLogic {
 		}
 	}
 
-/*	public function preInsert()
-	{
-		$this->setConfiguration('username', 'admin');
-		$this->setConfiguration('password', 'admin');
-		$this->setConfiguration('ip', 'ozw672');
-		$this->setLogicalId('ozw672');
-		$this->setEqType_name('ozw672');
-		$this->setIsEnable(1);
-		$this->setIsVisible(0);
-	}
-*/
 	public function postInsert()
 	{
 		if ( $this->getIsEnable() )
@@ -527,11 +531,11 @@ class ozw672 extends eqLogic {
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
 				$cmd->setEventOnly(1);
-				$cmd->save();		
+				$cmd->save();
 			}
 			$cmd = $this->getCmd(null, 'status');
 			if ( ! is_object($cmd) ) {
-				$cmd = new ipx800Cmd();
+				$cmd = new ozw672Cmd();
 				$cmd->setName('Etat');
 				$cmd->setEqLogic_id($this->getId());
 				$cmd->setType('info');
@@ -561,11 +565,11 @@ class ozw672 extends eqLogic {
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
 				$cmd->setEventOnly(1);
-				$cmd->save();		
+				$cmd->save();
 			}
 			$cmd = $this->getCmd(null, 'status');
 			if ( ! is_object($cmd) ) {
-				$cmd = new ipx800Cmd();
+				$cmd = new ozw672Cmd();
 				$cmd->setName('Etat');
 				$cmd->setEqLogic_id($this->getId());
 				$cmd->setType('info');
@@ -587,10 +591,7 @@ class ozw672 extends eqLogic {
 	}
 
 	function refreshInfo() {
-		$carte = ozw672::byId($this->getConfiguration('parent'));
-		if (!is_object($carte)) {
-			throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . $this->getConfiguration('parent'));
-		}
+        $carte = $this->getParent();
 		$carte->getSessionId();
 		$eqLogic_cmd = $this->getCmd(null, 'updatetime');
 		$eqLogic_cmd->event(date("d/m/Y H:i",(time())));
@@ -629,7 +630,7 @@ class ozw672 extends eqLogic {
 	}
 }
 
-class ozw672Cmd extends cmd 
+class ozw672Cmd extends cmd
 {
     /*     * *************************Attributs****************************** */
 
@@ -645,9 +646,51 @@ class ozw672Cmd extends cmd
         if (!is_object($eqLogic) || $eqLogic->getIsEnable() != 1) {
             throw new Exception(__('Equipement desactivé impossible d\éxecuter la commande : ' . $this->getHumanName(), __FILE__));
         }
-		log::add('ozw672','debug','get '.$this->getLogicalId());
+		log::add('ozw672','debug','execute '.$this->getLogicalId().' '.print_r($_options, true));
+        $carte = $this->getParent();
+		$carte->getSessionId();
+		$internalid = substr($this->getLogicalId(), 2);
+		switch ($this->getConfiguration('internal_type')) {
+			case "DateTime":
+			case "TimeOfDay":
+			case "Scheduler":
+				break;
+			case "RadioButton":
+				break;
+			case "Enumeration":
+				$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/write_datapoint.json?SessionId='. $carte->_SessionId.'&Id='.$internalid.'&Type=Enumeration&Value='.$_options['select'];
+				break;
+			case "Numeric":
+				$url = 'https://'.$carte->getConfiguration('ip').'/api/menutree/write_datapoint.json?SessionId='. $carte->_SessionId.'&Id='.$internalid.'&Type=Numeric&Value='.$_options['slider'];
+				break;
+			case "String":
+				break;
+			default:
+				log::add('ozw672','info','Error creation action : '.$item['Id'].' ('.$item['Text']['Long'].' : '.$item['WriteAccess'].')');
+				die;
+				break;
+		}
+		if ( isset($url) )
+		{
+			log::add('ozw672','debug',$url);
+			$json = $eqLogic->https_file_get_contents($url);
+			if ( $json === false )
+				throw new Exception(__('L\'ozw672 ne repond pas.',__FILE__));
+			$obj = json_decode($json, TRUE);
+			if ( ! isset($obj['Result']['Success']) || $obj['Result']['Success'] !== "true" )
+			{
+				log::add('ozw672','error',$obj['Result']['Error']['Txt']);
+				return false;
+			}
+		}
         return true;
     }
+
+	public function dontRemoveCmd() {
+		if ( $this->getLogicalId() == 'status' || $this->getLogicalId() == 'updatetime')
+			return true;
+		return false;
+	}
 
     public function formatValue($_value, $_quote = false) {
         if (trim($_value) == '') {

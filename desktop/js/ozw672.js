@@ -8,9 +8,6 @@ function addCmdToTable(_cmd) {
 
     if (init(_cmd.type) == 'info') {
         var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '" >';
-        if (init(_cmd.logicalId) == 'brut') {
-			tr += '<input type="hiden" name="brutid" value="' + init(_cmd.id) + '">';
-		}
         tr += '<td>';
         tr += '<span class="cmdAttr" data-l1key="id"></span>';
         tr += '</td>';
@@ -29,8 +26,8 @@ function addCmdToTable(_cmd) {
 		tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isHistorized"/> {{Historiser}}<br/></span>';
         tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/> {{Afficher}}<br/></span>';
         tr += '</td>';
-//		tr += '<td><i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i></td>';		
         tr += '<td>';
+		tr += '<i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>';		
         if (is_numeric(_cmd.id)) {
             tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
         }
@@ -62,6 +59,7 @@ function addCmdToTable(_cmd) {
         tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/> {{Afficher}}<br/></span>';
         tr += '</td>';
         tr += '<td>';
+		tr += '<i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>';		
         if (is_numeric(_cmd.id)) {
             tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
             tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> {{Tester}}</a>';
