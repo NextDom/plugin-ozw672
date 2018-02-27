@@ -1,0 +1,20 @@
+[panel,primary]
+.Pourquoi le plugin est gratuit ?
+--
+Ce plugin est gratuit pour que chacun puisse en profiter simplement. Si vous souhaitez tout de même faire un don au développeur du plugin, merci de me faire un MP sur le forum.
+--
+
+.J'aimerai remonter des erreurs/modifications directement dans le code ?
+--
+C'est tout à fait possible via https://github.com/guenneguezt/plugin-ozw672[github]
+--
+
+.Quelle est la fréquence de rafraichissement des informations ?
+--
+Le plugin actualise les informations toutes les minutes (modifiable dans le "Moteur de tâches")
+--
+
+.Le mot de passe que je saisie ne fonctionne pas.
+--
+Le plugin ne suporte pas certains caractères spéciaux genre # et @.
+--
