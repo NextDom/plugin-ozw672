@@ -647,7 +647,7 @@ class ozw672Cmd extends cmd
             throw new Exception(__('Equipement desactivé impossible d\éxecuter la commande : ' . $this->getHumanName(), __FILE__));
         }
 		log::add('ozw672','debug','execute '.$this->getLogicalId().' '.print_r($_options, true));
-        $carte = $this->getParent();
+        $carte = $eqLogic->getParent();
 		$carte->getSessionId();
 		$internalid = substr($this->getLogicalId(), 2);
 		switch ($this->getConfiguration('internal_type')) {
