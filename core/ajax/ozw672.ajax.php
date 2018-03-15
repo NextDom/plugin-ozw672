@@ -21,7 +21,7 @@ try {
     include_file('core', 'authentification', 'php');
 
     if (!isConnect('admin')) {
-        throw new Exception(__('401 - Accès non autorisé', __FILE__));
+        throw new \Exception(__('401 - Accès non autorisé', __FILE__));
     }
 
 	ajax::init();
@@ -29,7 +29,7 @@ try {
     if (init('action') == 'force_detect_carte') {
        $eqLogic = ozw672::byId(init('id'));
         if (!is_object($eqLogic)) {
-            throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
+            throw new \Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
         }
 		$ozw672 = $eqLogic->force_detect_carte();
 		ajax::success($ozw672);
@@ -38,7 +38,7 @@ try {
     if (init('action') == 'force_detect_commande_carte') {
         $eqLogic = ozw672::byId(init('id'));
         if (!is_object($eqLogic)) {
-            throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
+            throw new \Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
         }
 		$ozw672 = $eqLogic->scan_commande();
 		ajax::success($ozw672);
@@ -47,15 +47,15 @@ try {
     if (init('action') == 'force_detect_all_commande_carte') {
         $eqLogic = ozw672::byId(init('id'));
         if (!is_object($eqLogic)) {
-            throw new Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
+            throw new \Exception(__('ozw672 eqLogic non trouvé : ', __FILE__) . init('id'));
         }
 		$ozw672 = $eqLogic->scan_all_commande();
 		ajax::success($ozw672);
     }
 
-    throw new Exception(__('Aucune methode correspondante à : ', __FILE__) . init('action'));
-    /*     * *********Catch exeption*************** */
-} catch (Exception $e) {
-    ajax::error(displayExeption($e), $e->getCode());
+    throw new \Exception(__('Aucune methode correspondante à : ', __FILE__) . init('action'));
+ 
+} catch (\Exception $e) {
+    ajax::error(displayException($e), $e->getCode());
 }
-?>
+ 
