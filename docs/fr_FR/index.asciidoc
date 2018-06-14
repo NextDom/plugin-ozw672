@@ -1,7 +1,8 @@
 == Monitoring
 
 === Présentation
-Ce plugin permet de récupérer des informations des .
+Ce plugin permet de récupérer des informations des cartes ozw672.01.
+Le serveur Web OZW672... permet la télégestion d'installations via internet et une application pour Smartphone. Il permet le raccordement d'un appareil LPB/BSB.
 
 ==== Compatibilité :
 
